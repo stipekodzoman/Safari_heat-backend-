@@ -37,6 +37,7 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
    try {
       const {username,password} = req.body
+      console.log(username, password)
       const isTest=isTestUser(username)
       if (isTest) {
          if (password != "Aa1234"){

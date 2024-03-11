@@ -1,7 +1,7 @@
 import { Kafka } from "kafkajs";
 const kafka = new Kafka({
     brokers: ['localhost:9092'], // Replace with your Kafka broker(s) configuration
-    clientId: 'admin' // Provide a unique client ID
+    clientId: 'safariheat' // Provide a unique client ID
 });
 
 const admin = kafka.admin();

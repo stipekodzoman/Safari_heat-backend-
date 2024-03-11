@@ -97,7 +97,7 @@ app.use("/api/v1/users", userRoute);
 app.use("/api/v1/profile",profileRoute);
 
 const kafka = new Kafka({
-   clientId: "admin",
+   clientId: "safariheat",
    brokers: ['localhost:9092'], // Replace with your Kafka broker(s) configuration
 });
 

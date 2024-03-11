@@ -1,7 +1,7 @@
 import { Kafka } from "kafkajs";
 import checkTopicExists from "./checkTopicExist.js";
 const kafka = new Kafka({
-    clientId: "root",
+    clientId: "safariheat",
     brokers: ["localhost:9092"], // Replace with your Kafka broker(s) configuration
 });
 const admin = kafka.admin({ retry: { retries: 2 }});
