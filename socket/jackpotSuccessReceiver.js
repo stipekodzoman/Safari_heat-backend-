@@ -3,7 +3,7 @@ import SystemBalance from "../models/System_balance.js"
 import SystemBalanceLog from "../models/System_balance_log.js"
 import jackpotSenderRun from "./jackpotSender.js";
 import updateSenderRun from "./updateSender.js";
-export default async function jackpotSuccessReceiverRun(socket) {
+export default async function jackpotSuccessReceiverRun(io,socket) {
     socket.on("jackpot_success",async( message ) => {
             try{
                 const { jackpot, win_username } = JSON.parse(message.toString());
@@ -23,7 +23,7 @@ export default async function jackpotSuccessReceiverRun(socket) {
                 })
                 await systemBalanceLog.save()
                 await updateSenderRun(socket, balance)
-                await jackpotSenderRun(socket)
+                await jackpotSenderRun(io)
             }catch(error){
                 console.log(error)
             }

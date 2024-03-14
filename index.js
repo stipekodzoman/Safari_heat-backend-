@@ -30,11 +30,11 @@ io.on('connection', async(socket) => {
    console.log('User connected');
    socket.on('username', async (username) => {
       console.log(`Received username: ${username}`);
-      betReceiverRun(socket,username)
-      jackpotSuccessReceiverRun(socket)
+      betReceiverRun(io,socket,username)
+      jackpotSuccessReceiverRun(io,socket)
       majorAndMinorSenderRun(socket)
       spinResultReceiverRun(socket,username)
-      jackpotSenderRun(socket)
+      jackpotSenderRun(io)
    });
 
    socket.on('disconnect', () => {

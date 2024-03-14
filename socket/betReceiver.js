@@ -5,7 +5,7 @@ import { JACKPOT_POOL_RATE_PER_SPIN } from "../constants/settings.js";
 import jackpotSenderRun from "./jackpotSender.js";
 import updateSenderRun from "./updateSender.js";
 
-export default function betReceiverRun(socket, username) {
+export default function betReceiverRun(io,socket, username) {
     socket.on("bet",async (message) => {
             try{
                 const {bet}=JSON.parse(message)
@@ -24,7 +24,7 @@ export default function betReceiverRun(socket, username) {
                 })
                 await systemBalanceLog.save()
                 await updateSenderRun(socket, balance)
-                await jackpotSenderRun(socket)
+                await jackpotSenderRun(io)
             }catch(error){
                 console.log("Error occured while processing message")
                 console.log(error)
