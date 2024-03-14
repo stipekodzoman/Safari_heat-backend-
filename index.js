@@ -3,19 +3,44 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
+import { Server } from "socket.io";
+import {createServer} from 'http'
 import cookieParser from "cookie-parser";
-import { Kafka, Partitioners} from "kafkajs";
 import userRoute from './routes/users.js';
 import authRoute from './routes/auth.js';
 import profileRoute from './routes/profile.js';
 import Settings from "./models/Settings.js";
 import SystemBalance from "./models/System_balance.js";
 import User from "./models/User.js";
-import jackpotSuccessConsumerRun from "./kafka/jackpotSuccessConsumer.js";
-import majorAndMinorProducerRun from "./kafka/majorAndMinorProducer.js";
-import createTopic from "./kafka/createTopic.js";
+import betReceiverRun from "./socket/betReceiver.js";
+import jackpotSuccessReceiverRun from "./socket/jackpotSuccessReceiver.js";
+import majorAndMinorSenderRun from "./socket/majorAndMinorSender.js";
+import spinResultReceiverRun from "./socket/spinResultReceiver.js";
+import jackpotSenderRun from "./socket/jackpotSender.js";
 dotenv.config();
 const app = express();
+const httpServer=createServer(app)
+const io=new Server(httpServer,{
+   cors:{
+      origin:true,
+      credentials:true
+   }
+})
+io.on('connection', async(socket) => {
+   console.log('User connected');
+   socket.on('username', async (username) => {
+      console.log(`Received username: ${username}`);
+      betReceiverRun(socket,username)
+      jackpotSuccessReceiverRun(socket)
+      majorAndMinorSenderRun(socket)
+      spinResultReceiverRun(socket,username)
+      jackpotSenderRun(socket)
+   });
+
+   socket.on('disconnect', () => {
+      console.log('User disconnected');
+   });
+});
 const port = process.env.PORT || 8000;
 const corsOptions = {
    origin: true,
@@ -96,18 +121,11 @@ app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1/profile",profileRoute);
 
-const kafka = new Kafka({
-   clientId: "safariheat",
-   brokers: ['localhost:9092'], // Replace with your Kafka broker(s) configuration
-});
-
-app.listen(port, async () => {
+httpServer.listen(port, async () => {
    await connect();
    await createAdmin();
    await createSettings();
    await createSystemBalance();
-   await jackpotSuccessConsumerRun(kafka)
-   await createTopic("major_minor",10,1)
-   setInterval(() =>majorAndMinorProducerRun(kafka), 1000);
+
    console.log('server listening on port', port);
 })

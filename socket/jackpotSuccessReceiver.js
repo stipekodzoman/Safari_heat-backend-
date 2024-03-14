@@ -1,19 +1,12 @@
 import User from "../models/User.js"
 import SystemBalance from "../models/System_balance.js"
 import SystemBalanceLog from "../models/System_balance_log.js"
-import jackpotProducerRun from "./jackpotProducer.js";
-import updateProducerRun from "./updateProducer.js";
-import createTopic from "./createTopic.js";
-export default async function jackpotSuccessConsumerRun(kafka) {
-    //await createTopic("jackpotsuccess",5,1)
-    const jackpotSuccessConsumer = kafka.consumer({ groupId: "admin" });
-    await jackpotSuccessConsumer.subscribe({ topic: "jackpotsuccess", fromBeginning: false });
-    console.log("Connecting to kafka...")
-    await jackpotSuccessConsumer.run({
-        
-        eachMessage: async ({ topic,message }) => {
+import jackpotSenderRun from "./jackpotSender.js";
+import updateSenderRun from "./updateSender.js";
+export default async function jackpotSuccessReceiverRun(socket) {
+    socket.on("jackpot_success",async( message ) => {
             try{
-                const { jackpot, win_username } = JSON.parse(message.value.toString());
+                const { jackpot, win_username } = JSON.parse(message.toString());
                 console.log(win_username," won ",jackpot, " in this jackpot")
                 const user=await User.findOne({username:win_username})
                 const system_balance=await SystemBalance.findOne()
@@ -29,14 +22,12 @@ export default async function jackpotSuccessConsumerRun(kafka) {
                     jackpot:system_balance.jackpot
                 })
                 await systemBalanceLog.save()
-                await updateProducerRun(kafka, balance, win_username)
-                await jackpotProducerRun(kafka)
+                await updateSenderRun(socket, balance)
+                await jackpotSenderRun(socket)
             }catch(error){
                 console.log(error)
             }
             
         },
-    });
-    console.log("Connected to kafka")
-    console.log("Jackpot success consumer is listening...")
+    );
 }

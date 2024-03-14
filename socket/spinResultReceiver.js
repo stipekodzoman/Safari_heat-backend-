@@ -2,18 +2,11 @@ import User from "../models/User.js"
 import SystemBalance from "../models/System_balance.js"
 import SystemBalanceLog from "../models/System_balance_log.js"
 import UserHistory from "../models/User_history.js"
-import updateProducerRun from "./updateProducer.js";
-import createTopic from "./createTopic.js";
-export default async function spinResultConsumerRun(kafka, username) {
-    //await createTopic("spinresult_"+username,1,1)
-    const spinResultConsumer = kafka.consumer({ groupId: "spinresult_"+username });
-    await spinResultConsumer.subscribe({ topic: "spinresult_"+username, fromBeginning: false });
-    
-    await spinResultConsumer.run({
-
-        eachMessage: async ({ topic,message }) => {
+import updateSenderRun from "./updateSender.js";
+export default async function spinResultReceiverRun(socket, username) {
+    socket.on("spinresult",async(message ) => {
             try{
-                const { lines, bet, spin_type, pay_lines, winning } = JSON.parse(message.value.toString());
+                const { lines, bet, spin_type, pay_lines, winning } = JSON.parse(message.toString());
                 const user=await User.findOne({username:username})
                 const system_balance=await SystemBalance.findOne()
                 let balance=user.balance
@@ -27,7 +20,7 @@ export default async function spinResultConsumerRun(kafka, username) {
                     jackpot:system_balance.jackpot
                 })
                 await systemBalanceLog.save()
-                await updateProducerRun(kafka, balance,username)
+                await updateSenderRun(socket, balance,username)
                 const user_history=await UserHistory.findOne({username:username})
                 if (user_history){
                     user_history.histories.push({
@@ -59,6 +52,5 @@ export default async function spinResultConsumerRun(kafka, username) {
             }
             
         },
-    });
-    console.log("-------------->Spinresult_"+username+" consumer is listening...")
+    );
 }

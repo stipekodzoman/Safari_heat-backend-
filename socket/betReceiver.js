@@ -2,20 +2,13 @@ import User from "../models/User.js"
 import SystemBalance from "../models/System_balance.js"
 import SystemBalanceLog from "../models/System_balance_log.js"
 import { JACKPOT_POOL_RATE_PER_SPIN } from "../constants/settings.js";
-import jackpotProducerRun from "./jackpotProducer.js";
-import updateProducerRun from "./updateProducer.js";
-import createTopic from "./createTopic.js";
-export default async function betConsumerRun(kafka, username) {
-    // await createTopic("bet_"+username, 1,1)
-    const betConsumer = kafka.consumer({ groupId: "bet_"+username });
-    await betConsumer.subscribe({ topic: "bet_"+username, fromBeginning: false });
-    
-    await betConsumer.run({
-        eachMessage: async ({ topic,message }) => {
-            console.log("bet------>",message.value.toString());
+import jackpotSenderRun from "./jackpotSender.js";
+import updateSenderRun from "./updateSender.js";
+
+export default function betReceiverRun(socket, username) {
+    socket.on("bet",async (message) => {
             try{
-                const {bet}=JSON.parse(message.value.toString());
-                console.log(bet)
+                const {bet}=JSON.parse(message)
                 const user=await User.findOne({username:username})
                 const system_balance=await SystemBalance.findOne()
                 let balance=user.balance
@@ -30,14 +23,13 @@ export default async function betConsumerRun(kafka, username) {
                     jackpot:system_balance.jackpot
                 })
                 await systemBalanceLog.save()
-                await updateProducerRun(kafka, balance,username)
-                await jackpotProducerRun(kafka)
+                await updateSenderRun(socket, balance)
+                await jackpotSenderRun(socket)
             }catch(error){
                 console.log("Error occured while processing message")
                 console.log(error)
             }
             
         },
-    });
-    console.log("-------------->bet_"+username+" consumer is listening....")
+    );
 }
