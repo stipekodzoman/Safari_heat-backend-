@@ -17,6 +17,7 @@ import jackpotSuccessReceiverRun from "./socket/jackpotSuccessReceiver.js";
 import majorAndMinorSenderRun from "./socket/majorAndMinorSender.js";
 import spinResultReceiverRun from "./socket/spinResultReceiver.js";
 import jackpotSenderRun from "./socket/jackpotSender.js";
+import gambleReceiverRun from "./socket/gambleReceiver.js";
 dotenv.config();
 const app = express();
 const httpServer=createServer(app)
@@ -35,6 +36,7 @@ io.on('connection', async(socket) => {
       majorAndMinorSenderRun(socket)
       spinResultReceiverRun(socket,username)
       jackpotSenderRun(io)
+      gambleReceiverRun(socket,username)
    });
 
    socket.on('disconnect', () => {

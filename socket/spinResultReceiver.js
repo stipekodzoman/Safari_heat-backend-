@@ -28,7 +28,7 @@ export default async function spinResultReceiverRun(socket, username) {
                         bet:bet,
                         spin_type:spin_type,
                         pay_lines:pay_lines,
-                        winning:winning
+                        winning:winning,
                     })
                     await user_history.save()
                 } else{

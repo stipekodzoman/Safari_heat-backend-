@@ -16,7 +16,7 @@ export default function betReceiverRun(io,socket, username) {
                 user.balance=balance
                 await user.save()
                 system_balance.system_balance+=parseFloat((bet*(1-JACKPOT_POOL_RATE_PER_SPIN/100)).toFixed(2))
-                system_balance.jackpot+=parseFloat((bet*JACKPOT_POOL_RATE_PER_SPIN/100).toFixed(6))
+                system_balance.jackpot+=parseFloat((bet*JACKPOT_POOL_RATE_PER_SPIN/100).toFixed(4))
                 await system_balance.save()
                 const systemBalanceLog= new SystemBalanceLog({
                     system_balance:system_balance.system_balance,
