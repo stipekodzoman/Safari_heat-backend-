@@ -9,4 +9,4 @@ export const SYSTEM_BALANCE_LOG_DURATION=1
 export const USER_HISTORY_LOG_DURATION=1
 export const RTP=96
 
-export const INITIAL_JACKPOT=1000.00
+export const INITIAL_JACKPOT=3000.00

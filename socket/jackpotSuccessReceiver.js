@@ -11,11 +11,11 @@ export default async function jackpotSuccessReceiverRun(io,socket) {
                 const user=await User.findOne({username:win_username})
                 const system_balance=await SystemBalance.findOne()
                 let balance=user.balance
-                balance+=jackpot
+                balance+=parseFloat(jackpot)
                 user.balance=balance
                 await user.save()
-                system_balance.system_balance-=jackpot
-                system_balance.jackpot=0.00
+                system_balance.system_balance-=parseFloat(jackpot)
+                system_balance.jackpot-=parseFloat(jackpot)
                 await system_balance.save()
                 const systemBalanceLog= new SystemBalanceLog({
                     system_balance:system_balance.system_balance,
