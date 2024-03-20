@@ -36,14 +36,20 @@ export const register = async (req, res) => {
 // user login
 export const login = async (req, res) => {
    try {
-      const {username,password} = req.body
+      const {username,password} = req.query
       console.log(username, password)
       const isTest=isTestUser(username)
       if (isTest) {
          if (password != "Aa1234"){
             return res.status(404).json({ success: false, message: 'Incorrect password' })
          }
-         const testuser=await User.findOne({username:username})
+         let testuser
+         try{
+            testuser=await User.findOne({username:username})
+         }catch(e){
+            console.log(e)
+         }
+         
          if (testuser) {
             return res.status(404).json({ success: false, message:"This account is already in use" })
          }
@@ -53,12 +59,19 @@ export const login = async (req, res) => {
                balance:10000.00
             })
             await testUserData.save()
-            runKafka(username)
-            return res.status(200).json({ success: true, message:"Successfully logged in!" })
+            const token = jwt.sign({ id: username, role:0 }, process.env.JWT_SECRET_KEY, { expiresIn:"15d" })
+            return res.status(200).json({ success: true,accessToken:token, message:"Successfully logged in!" })
          }
       }
       else{
-         const user=await User.findOne({ username:username })
+         let user
+         try{
+            user=await User.findOne({ username:username })
+            console.log(user)
+         }catch(err){
+            console.log(err)
+         }
+         
          // if user doesn't exist
          if (!user) {
             return res.status(404).json({ success: false, message: 'User not found!' })
@@ -77,7 +90,7 @@ export const login = async (req, res) => {
             const token = jwt.sign({ id: user.username, role: user.role }, process.env.JWT_SECRET_KEY, { expiresIn:"15d" })
 
             // set token in the browser cookies and send the response to the client
-            res.status(200).json({accessToken:token, message:"Successfully logged in!"})
+            res.status(200).json({success:true,accessToken:token, message:"Successfully logged in!"})
          }
       }
       
@@ -88,13 +101,13 @@ export const login = async (req, res) => {
 }
 
 export const logout = async(req,res)=>{
-   const {username}=req.body
+   const {username}=req.query
    const isTest= isTestUser(username)
    if (isTest){
       await User.deleteOne({username:username})
       res.status(200).json({status:true,message:"Successfully logged out"})
    }
    else {
-      res.status(200).clearCookie("accessToken").json({ success: true, message: 'Successfully logged out' })
+      res.status(200).json({ success: true, message: 'Successfully logged out' })
    }
 }
