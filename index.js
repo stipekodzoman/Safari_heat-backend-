@@ -18,19 +18,25 @@ import majorAndMinorSenderRun from "./socket/majorAndMinorSender.js";
 import spinResultReceiverRun from "./socket/spinResultReceiver.js";
 import jackpotSenderRun from "./socket/jackpotSender.js";
 import gambleReceiverRun from "./socket/gambleReceiver.js";
+import jackpotRandomSenderRun from "./socket/jackpotRandomSender.js";
 dotenv.config();
 const app = express();
 const httpServer=createServer(app)
 const io=new Server(httpServer,{
-   cors:{
-      origin:true,
-      credentials:true
-   }
+   cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+      credentials:true,
+      secure:true
+    },
 })
+jackpotRandomSenderRun(io)
 io.on('connection', async(socket) => {
    console.log('User connected');
    socket.on('username', async (username) => {
       console.log(`Received username: ${username}`);
+      const user=await User.findOne({username:username})
+      await socket.emit('balance',JSON.stringify({balance:user.balance}))
       betReceiverRun(io,socket,username)
       jackpotSuccessReceiverRun(io,socket)
       majorAndMinorSenderRun(socket)
@@ -44,10 +50,10 @@ io.on('connection', async(socket) => {
    });
 });
 const port = process.env.PORT || 8000;
-const corsOptions = {
-   origin: true,
-   credentials: true,
-};
+// const corsOptions = {
+//    origin: true,
+//    credentials: true,
+// };
 mongoose.set("strictQuery", false);
 const connect = async() => {
    try {
@@ -116,7 +122,12 @@ const createSystemBalance=async()=>{
 }
 app.use(express.json());
 app.use(express.urlencoded());
-app.use(cors(corsOptions));
+app.use(cors({
+   origin: '*',
+   methods: ["GET", "POST"],
+   credentials:true,
+   secure:true
+ }));
 app.use(cookieParser());
 app.use(express.static('assets'));
 app.use("/api/v1/auth", authRoute);

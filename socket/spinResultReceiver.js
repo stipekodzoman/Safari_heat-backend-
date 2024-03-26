@@ -20,7 +20,7 @@ export default async function spinResultReceiverRun(socket, username) {
                     jackpot:system_balance.jackpot
                 })
                 await systemBalanceLog.save()
-                await updateSenderRun(socket, balance,username)
+                // await updateSenderRun(socket, balance,username)
                 const user_history=await UserHistory.findOne({username:username})
                 if (user_history){
                     user_history.histories.push({

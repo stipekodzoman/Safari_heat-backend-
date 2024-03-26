@@ -9,7 +9,7 @@ export const register = async (req, res) => {
       //hashing password
       const isTest=isTestUser(req.body.username)
       if (isTest) {
-         return res.status(404).json({success:false,mesage:"This username is for test user. Please try other username"})
+         return res.json({success:false,mesage:"This username is for test user. Please try other username"})
       }
       const salt = bcrypt.genSaltSync(10)
       const hash = bcrypt.hashSync(req.body.password, salt)
@@ -28,7 +28,7 @@ export const register = async (req, res) => {
       res.status(200).json({ success: true, message: "Successfully created!" })
    } catch (error) {
       console.log(error)
-      res.status(500).json({ success: false, message: "That username already exists! Try again." })
+      res.json({ success: false, message: "That username already exists! Try again." })
    
    }
 }
@@ -37,11 +37,10 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
    try {
       const {username,password} = req.query
-      console.log(username, password)
       const isTest=isTestUser(username)
       if (isTest) {
          if (password != "Aa1234"){
-            return res.status(404).json({ success: false, message: 'Incorrect password' })
+            return res.json({ success: false, message: 'Incorrect password' })
          }
          let testuser
          try{
@@ -51,7 +50,7 @@ export const login = async (req, res) => {
          }
          
          if (testuser) {
-            return res.status(404).json({ success: false, message:"This account is already in use" })
+            return res.json({ success: false, message:"This account is already in use" })
          }
          else{
             const testUserData = new User({
@@ -74,7 +73,7 @@ export const login = async (req, res) => {
          
          // if user doesn't exist
          if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found!' })
+            return res.json({ success: false, message: 'User not found!' })
          }
 
          // if user is exist then check the password or compare the password
@@ -82,7 +81,7 @@ export const login = async (req, res) => {
 
          // if password incorrect 
          if (!checkCorrectPassword) {
-            return res.status(401).json({ success: false, message: "Incorrect password!" })
+            return res.json({ success: false, message: "Incorrect password!" })
          }
          else{
 
@@ -96,7 +95,7 @@ export const login = async (req, res) => {
       
    } catch (error) {
       console.log(error)
-      res.status(500).json({ success: false, message: "Failed to login" })
+      res.json({ success: false, message: "Failed to login. Internal server error" })
    }
 }
 

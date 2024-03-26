@@ -22,7 +22,7 @@ export default async function jackpotSuccessReceiverRun(io,socket) {
                     jackpot:system_balance.jackpot
                 })
                 await systemBalanceLog.save()
-                await updateSenderRun(socket, balance)
+                // await updateSenderRun(socket, balance)
                 await jackpotSenderRun(io)
             }catch(error){
                 console.log(error)

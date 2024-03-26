@@ -23,7 +23,7 @@ export default function betReceiverRun(io,socket, username) {
                     jackpot:system_balance.jackpot
                 })
                 await systemBalanceLog.save()
-                await updateSenderRun(socket, balance)
+                // await updateSenderRun(socket, balance)
                 await jackpotSenderRun(io)
             }catch(error){
                 console.log("Error occured while processing message")

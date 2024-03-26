@@ -11,7 +11,7 @@ export default function gambleReceiverRun(socket, username) {
                 balance+=parseFloat(gamble)
                 user.balance=balance
                 await user.save()
-                await updateSenderRun(socket, balance)
+                // await updateSenderRun(socket, balance)
             }catch(error){
                 console.log("Error occured while processing message")
                 console.log(error)
